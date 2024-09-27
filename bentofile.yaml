@@ -1,0 +1,13 @@
+service: 'application.src.create_service:employee_churn'
+include:
+ - config
+ - application/src
+python:
+  packages:
+  - bentoml
+  - hydra-core
+  - numpy
+  - pandas
+  - pydantic
+  - streamlit
+  - xgboost
