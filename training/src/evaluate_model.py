@@ -9,7 +9,9 @@ from omegaconf import DictConfig
 from sklearn.metrics import accuracy_score, f1_score
 from xgboost import XGBClassifier
 import os
+import dagshub
 
+dagshub.init(repo_owner='as183789043', repo_name='MLOps-End-to-End-Project', mlflow=True)
 
 def load_data(path: DictConfig):
     X_test = pd.read_csv(abspath(path.X_test.path))
@@ -39,11 +41,7 @@ def log_metrics(**metrics: dict):
 
 @hydra.main( config_path="../../config", config_name="main")
 def evaluate(config: DictConfig):
-    mlflow.set_tracking_uri(os.getenv('mlflow_tracking_ui'))
     mlflow.set_experiment('Employee-Churn')
-    os.environ['MLFLOW_TRACKING_USERNAME'] = os.getenv('mlflow_username')
-    os.environ['MLFLOW_TRACKING_PASSWORD'] = os.getenv('mlflow_password')
-
     with mlflow.start_run():
 
         # Load data and model
