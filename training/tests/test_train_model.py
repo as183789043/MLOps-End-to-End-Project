@@ -28,5 +28,6 @@ def test_xgboost():
     vaildation_ds = Dataset(test_df,label='LeaveOrNot',cat_features=test_df_list)
 
     check = PredictionDrift(drift_mode='prediction')
-    check.run(train_ds, vaildation_ds, model=model)
+    result=check.run(train_ds, vaildation_ds, model=model)
+    result.save_as_html('predict-diff.html')
 

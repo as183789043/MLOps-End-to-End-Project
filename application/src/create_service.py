@@ -29,7 +29,7 @@ def add_dummy_data(df: pd.DataFrame):
         "City": ["Bangalore", "New Delhi", "Pune"],
         "Gender": ["Male", "Female", "Female"],
         "EverBenched": ["Yes", "Yes", "No"],
-        "PaymentTier": [0, 0, 0],
+        "PaymentTier": [1, 2, 3],
         "Age": [0, 0, 0],
         "ExperienceInCurrentDomain": [0, 0, 0],
     }
