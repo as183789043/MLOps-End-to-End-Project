@@ -1,0 +1,58 @@
+name: Test Code and Model
+
+on: [push]
+
+jobs:
+  test_model:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["pypy3.10", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Pip install
+        run : pip install  -r requirements.txt
+
+
+      - name: Pull data
+        run: |
+          dvc remote modify origin --local auth basic
+          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+          dvc remote modify origin --local password ${{ secrets.DAGSHUB_TOKEN }}
+          dvc pull -r origin data/ models/
+
+      - name: Pytest process and train model
+        run: |
+          pytest ./training/tests
+
+      - name: Generate predict-diff.html artifact  by train model
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          path: predict-diff.html
+
+      - name: Save model to BentoML local store
+        run: python3 application/src/save_model_to_bentoml.py
+
+      - name: Serve the app locally and run app tests
+        run: |
+          bentoml serve application.src.create_service:employee_churn  & 
+          sleep 10
+          pytest application/tests
+          kill -9 `lsof -i:3000 -t`
+
+      
+
+        
+
+        
+
+        
