@@ -22,7 +22,6 @@ jobs:
 
       - name: Pull data
         run: |
-          dvc remote modify origin endpointurl https://dagshub.com/as183789043/MLOps-End-to-End-Project.s3
           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
           dvc remote modify origin --local password ${{ secrets.DAGSHUB_TOKEN }}
           dvc pull -r origin data/ models/
