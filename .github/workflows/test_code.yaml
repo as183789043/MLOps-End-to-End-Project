@@ -59,7 +59,7 @@ jobs:
       
       - name: Generate Model API Image
         run: |
-          bentoml containerize employee_churn:latest -t employee_churn:latest
+          bentoml containerize employee_churn:latest -t ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
           
 
