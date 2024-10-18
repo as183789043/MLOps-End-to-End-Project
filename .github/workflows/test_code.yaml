@@ -22,8 +22,8 @@ jobs:
 
       - name: Pull data
         run: |
-          dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
+          dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_ACCESS_KEY_ID }}
+          dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_SECRET_ACCESS_KEY }}
           dvc pull -r origin data/ models/
 
       - name: Pytest process and train model
