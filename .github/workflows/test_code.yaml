@@ -8,68 +8,68 @@ permissions:
   id-token: 'write'
 
 jobs:
-  # test_model:
-  #   runs-on: ubuntu-latest
+  test_model:
+    runs-on: ubuntu-latest
     
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5.2.0
-  #       with:
-  #         python-version: 3.11
-  #         cache: 'pip'
-  #     - name: Display Python version
-  #       run: python -c "import sys; print(sys.version)"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5.2.0
+        with:
+          python-version: 3.11
+          cache: 'pip'
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
 
-  #     - name: Pip install
-  #       run : pip install  -r requirements.txt
+      - name: Pip install
+        run : pip install  -r requirements.txt
 
 
-  #     - name: Pull data
-  #       run: |
-  #         dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_ACCESS_KEY_ID }}
-  #         dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_SECRET_ACCESS_KEY }}
-  #         dvc pull -r origin data/ models/
+      - name: Pull data
+        run: |
+          dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_ACCESS_KEY_ID }}
+          dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_SECRET_ACCESS_KEY }}
+          dvc pull -r origin data/ models/
 
-  #     - name: Pytest process and train model
-  #       run: |
-  #         pytest ./training/tests
+      - name: Pytest process and train model
+        run: |
+          pytest ./training/tests
 
-  #     - name: Generate predict-diff.html artifact  by train model
-  #       uses: actions/upload-artifact@v4.4.3
-  #       with:
-  #         path: predict-diff.html
+      - name: Generate predict-diff.html artifact  by train model
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          path: predict-diff.html
 
-  #     - name: Save model to BentoML local store
-  #       run: python3 application/src/save_model_to_bentoml.py
+      - name: Save model to BentoML local store
+        run: python3 application/src/save_model_to_bentoml.py
         
 
-  #     - name: Serve the app locally and run app tests to build image
-  #       run: |
-  #         bentoml serve application.src.create_service:employee_churn  & 
-  #         sleep 10
-  #         pytest application/tests
-  #         kill -9 `lsof -i:3000 -t`
-  #         bentoml build
+      - name: Serve the app locally and run app tests to build image
+        run: |
+          bentoml serve application.src.create_service:employee_churn  & 
+          sleep 10
+          pytest application/tests
+          kill -9 `lsof -i:3000 -t`
+          bentoml build
 
 
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  #     - name: Log in to Docker Hub
-  #       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-  #       with:
-  #         username: ${{ secrets.DOCKER_USERNAME }}
-  #         password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
       
-  #     - name: Generate Model API Image
-  #       run: |
-  #         bentoml containerize employee_churn:latest -t ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
-  #         docker push ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
+      - name: Generate Model API Image
+        run: |
+          bentoml containerize employee_churn:latest -t ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
 
 
   Deploy_to_Gcloud:
-    # needs: test_model
+    needs: test_model
     runs-on: ubuntu-latest
     steps:
       - name: Log in to Docker Hub
@@ -102,7 +102,7 @@ jobs:
         with:
           service: 'employee-churn-1'
           image: "rickhsu1999/employee_churn:latest@${{ env.IMAGE_SHA }}"
-          project_id: 'ornate-apricot-353301'
+          project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
           region: 'asia-east1'  
           
 
