@@ -85,7 +85,12 @@ jobs:
         id: get_sha
         run: |
           IMAGE_SHA=$(docker inspect --format='{{index .RepoDigests 0}}' rickhsu1999/employee_churn:latest)
+          if [[ -z "$IMAGE_SHA" ]]; then
+            echo "Error: Unable to get image SHA"
+            exit 1
+          fi
           echo "Image SHA: $IMAGE_SHA"
+          echo "IMAGE_SHA=${IMAGE_SHA#*@}" >> $GITHUB_ENV
           
       - uses: 'google-github-actions/auth@v2'
         with:
@@ -96,7 +101,7 @@ jobs:
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
           service: 'employee-churn-1'
-          image: "$IMAGE_SHA"
+          image: "rickhsu1999/employee_churn:latest@${{ env.IMAGE_SHA }}"
           project_id: 'ornate-apricot-353301'
           region: 'asia-east1'  
           
