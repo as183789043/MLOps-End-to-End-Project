@@ -99,7 +99,8 @@ jobs:
         with:
           service: 'employee-churn-1'
           image: 'rickhsu1999/employee_churn:latest@${{ steps.get_sha.outputs.image_sha }}'
-          port: 3000
+          project_id: 'ornate-apricot-353301'
+          region: 'asia-east1'  # 根据需要调整区域
           
 
   
