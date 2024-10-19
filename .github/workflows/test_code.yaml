@@ -100,6 +100,7 @@ jobs:
           service: 'employee-churn-1'
           image: 'rickhsu1999/employee_churn:latest@${{ steps.get_sha.outputs.image_sha }}'
           project_id: 'ornate-apricot-353301'
+          region: 'asia-east1'  
           
 
   
