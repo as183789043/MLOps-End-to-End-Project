@@ -88,21 +88,20 @@ jobs:
           echo "Image SHA: $IMAGE_SHA"
 
 
-      - id: 'auth'
-        name: 'Authenticate to GCP'
-        uses: 'google-github-actions/auth@f1e2d3c4b5a6f7e8d9c0b1a2c3d4e5f6a7b8c9d0'
+
+      - uses: 'google-github-actions/auth@v2'
         with:
-            create_credentials_file: 'true'
-            workload_identity_provider: 'projects/623372933969/locations/global/workloadIdentityPools/github-action-pool/providers/github-action'
-            service_account: 'github-service-account'
-      - id: 'gcloud'
-        name: 'gcloud'
-        run: |-
-          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
-          gcloud services list
-
-      
-
+          workload_identity_provider: 'projects/623372933969/locations/global/workloadIdentityPools/github-action-pool/providers/github-action'
+          service_account: 'github-service-account@ornate-apricot-353301.iam.gserviceaccount.com'
+  
+      - id: 'deploy'
+        uses: 'google-github-actions/deploy-cloudrun@v2'
+        with:
+          service: 'hello-cloud-run'
+          image: 'gcr.io/cloudrun/hello'
+  
+      - name: 'Use output'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
         
 
         
