@@ -64,6 +64,7 @@ jobs:
 
 
   Deploy_to_Gcloud:
+    needs: test_model
     runs-on: ubuntu-latest
     steps:
       - name: Log in to Docker Hub
@@ -80,7 +81,20 @@ jobs:
         run: |
           IMAGE_SHA=$(docker inspect --format='{{index .RepoDigests 0}}' rickhsu1999/employee_churn:latest)
           echo "Image SHA: $IMAGE_SHA"
+
+      - uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: 'my-project'
+          workload_identity_provider: 'projects/623372933969/locations/global/workloadIdentityPools/github-service-account/subject/SUBJECT_ATTRIBUTE_VALUE'
           
+      - id: 'deploy'
+        uses: 'google-github-actions/deploy-cloudrun@v2'
+        with:
+          service: 'employee-churn-1'
+          image: 'gcr.io/cloudrun/hello'
+  
+      - name: 'Use output'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
 
           
 
