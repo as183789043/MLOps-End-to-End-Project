@@ -91,14 +91,17 @@ jobs:
 
       - uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: 'projects/623372933969/locations/global/workloadIdentityPools/github-action-pool/providers/github-action'
-          service_account: 'github-service-account@ornate-apricot-353301.iam.gserviceaccount.com'
+          workload_identity_provider: ${{ secrets.GCLOUD_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
   
       - id: 'deploy'
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
-          service: 'hello-cloud-run'
-          image: 'gcr.io/cloudrun/hello'
+          service: 'employee-churn-1'
+          image: 'rickhsu1999/employee_churn:latest@${{ steps.get_sha.outputs.image_sha }}'
+          port: 3000
+          
+
   
       - name: 'Use output'
         run: 'curl "${{ steps.deploy.outputs.url }}"'
