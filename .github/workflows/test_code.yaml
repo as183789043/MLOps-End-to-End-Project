@@ -98,7 +98,7 @@ jobs:
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
           service: 'employee-churn-1'
-          image: 'rickhsu1999/employee_churn:latest@$IMAGE_SHA'
+          image: "rickhsu1999/employee_churn:latest@$IMAGE_SHA"
           project_id: 'ornate-apricot-353301'
           region: 'asia-east1'  
           
