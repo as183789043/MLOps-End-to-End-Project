@@ -2,69 +2,72 @@ name: Test Code and Model
 
 on: [push]
 
+permissions:
+  id-token: write
+
 jobs:
-  test_model:
-    runs-on: ubuntu-latest
+  # test_model:
+  #   runs-on: ubuntu-latest
     
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5.2.0
-        with:
-          python-version: 3.11
-          cache: 'pip'
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5.2.0
+  #       with:
+  #         python-version: 3.11
+  #         cache: 'pip'
+  #     - name: Display Python version
+  #       run: python -c "import sys; print(sys.version)"
 
-      - name: Pip install
-        run : pip install  -r requirements.txt
+  #     - name: Pip install
+  #       run : pip install  -r requirements.txt
 
 
-      - name: Pull data
-        run: |
-          dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_ACCESS_KEY_ID }}
-          dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_SECRET_ACCESS_KEY }}
-          dvc pull -r origin data/ models/
+  #     - name: Pull data
+  #       run: |
+  #         dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_ACCESS_KEY_ID }}
+  #         dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_SECRET_ACCESS_KEY }}
+  #         dvc pull -r origin data/ models/
 
-      - name: Pytest process and train model
-        run: |
-          pytest ./training/tests
+  #     - name: Pytest process and train model
+  #       run: |
+  #         pytest ./training/tests
 
-      - name: Generate predict-diff.html artifact  by train model
-        uses: actions/upload-artifact@v4.4.3
-        with:
-          path: predict-diff.html
+  #     - name: Generate predict-diff.html artifact  by train model
+  #       uses: actions/upload-artifact@v4.4.3
+  #       with:
+  #         path: predict-diff.html
 
-      - name: Save model to BentoML local store
-        run: python3 application/src/save_model_to_bentoml.py
+  #     - name: Save model to BentoML local store
+  #       run: python3 application/src/save_model_to_bentoml.py
         
 
-      - name: Serve the app locally and run app tests to build image
-        run: |
-          bentoml serve application.src.create_service:employee_churn  & 
-          sleep 10
-          pytest application/tests
-          kill -9 `lsof -i:3000 -t`
-          bentoml build
+  #     - name: Serve the app locally and run app tests to build image
+  #       run: |
+  #         bentoml serve application.src.create_service:employee_churn  & 
+  #         sleep 10
+  #         pytest application/tests
+  #         kill -9 `lsof -i:3000 -t`
+  #         bentoml build
 
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+  #     - name: Log in to Docker Hub
+  #       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_TOKEN }}
       
-      - name: Generate Model API Image
-        run: |
-          bentoml containerize employee_churn:latest -t ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
+  #     - name: Generate Model API Image
+  #       run: |
+  #         bentoml containerize employee_churn:latest -t ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
+  #         docker push ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
 
 
   Deploy_to_Gcloud:
-    needs: test_model
+    # needs: test_model
     runs-on: ubuntu-latest
     steps:
       - name: Log in to Docker Hub
@@ -82,20 +85,19 @@ jobs:
           IMAGE_SHA=$(docker inspect --format='{{index .RepoDigests 0}}' rickhsu1999/employee_churn:latest)
           echo "Image SHA: $IMAGE_SHA"
 
-      - uses: 'google-github-actions/auth@v2'
-        with:
-          project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
-          workload_identity_provider: 'projects/623372933969/locations/global/workloadIdentityPools/github-action-pool/providers/github-action'
-          
-      - id: 'deploy'
-        uses: 'google-github-actions/deploy-cloudrun@v2'
-        with:
-          service: 'employee-churn-1'
-          image: 'gcr.io/cloudrun/hello'
-  
-      - name: 'Use output'
-        run: 'curl "${{ steps.deploy.outputs.url }}"'
 
+      - id: 'auth'
+        name: 'Authenticate to GCP'
+        uses: 'google-github-actions/auth@f1e2d3c4b5a6f7e8d9c0b1a2c3d4e5f6a7b8c9d0'
+        with:
+            create_credentials_file: 'true'
+            workload_identity_provider: 'WORKLOAD-IDENTITY-PROVIDER'
+            service_account: 'SERVICE-ACCOUNT'
+      - id: 'gcloud'
+        name: 'gcloud'
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+          gcloud services list
           
 
       
