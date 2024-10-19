@@ -84,8 +84,8 @@ jobs:
 
       - uses: 'google-github-actions/auth@v2'
         with:
-          project_id: 'my-project'
-          workload_identity_provider: 'projects/623372933969/locations/global/workloadIdentityPools/github-service-account/subject/SUBJECT_ATTRIBUTE_VALUE'
+          project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+          workload_identity_provider: 'projects/623372933969/locations/global/workloadIdentityPools/github-action-pool/providers/github-action'
           
       - id: 'deploy'
         uses: 'google-github-actions/deploy-cloudrun@v2'
