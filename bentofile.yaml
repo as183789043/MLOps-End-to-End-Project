@@ -11,3 +11,4 @@ python:
   - pydantic
   - streamlit
   - xgboost
+  - scikit-learn
