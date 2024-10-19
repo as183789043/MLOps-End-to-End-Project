@@ -61,6 +61,27 @@ jobs:
         run: |
           bentoml containerize employee_churn:latest -t ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/employee_churn:latest
+
+
+  Deploy_to_Gcloud:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+         with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+        
+      - name: Pull Docker image
+        run: docker pull rickhsu1999/employee_churn:latest
+  
+      - name: Get image SHA
+        id: get_sha
+        run: |
+          IMAGE_SHA=$(docker inspect --format='{{index .RepoDigests 0}}' rickhsu1999/employee_churn:latest)
+          echo "Image SHA: $IMAGE_SHA"
+          
+
           
 
       
