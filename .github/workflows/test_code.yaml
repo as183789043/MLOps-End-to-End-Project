@@ -2,8 +2,10 @@ name: Test Code and Model
 
 on: [push]
 
+
 permissions:
-  id-token: write
+  contents: 'read'
+  id-token: 'write'
 
 jobs:
   # test_model:
@@ -98,7 +100,6 @@ jobs:
         run: |-
           gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
           gcloud services list
-          
 
       
 
