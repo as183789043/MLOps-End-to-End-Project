@@ -49,7 +49,7 @@ def write_predictions(data: dict):
 
         try:
             prediction = int(requests.post(
-                "http://localhost:3000/predict",
+                "https://employee-churn-1-623372933969.asia-east1.run.app/predict",
                 headers={"content-type": "application/json"},
                 data=data_json,
             ).text[0])
