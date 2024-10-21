@@ -9,6 +9,5 @@ python:
   - numpy
   - pandas
   - pydantic
-  - streamlit
   - xgboost
   - scikit-learn
