@@ -1,4 +1,4 @@
-json
+ujson
 requests
 streamlit
 datetime
