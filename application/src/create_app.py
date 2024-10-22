@@ -10,6 +10,7 @@ year = date.strftime("%Y")
 
 
 def data_input():
+    
     st.title("Predict Employee Future")
     data = {}
 
@@ -44,24 +45,32 @@ def data_input():
 
 def write_predictions(data: dict):
     if st.button("Will this employee leave in 2 years?"):
-        payload = {"employee": data}
-        data_json = json.dumps(payload)
+        with st.status("In Porgess, Wait a minute...", expanded=True) as status:
 
-        try:
-            prediction = int(requests.post(
-                "https://employee-churn-1-623372933969.asia-east1.run.app/predict",
-                headers={"content-type": "application/json"},
-                data=data_json,
-            ).text[0])
-            
+            st.write("Send Data to model...")
+            payload = {"employee": data}
+            data_json = json.dumps(payload)
 
-            if prediction == 0:
-                st.write("This employee is predicted to stay more than two years.")
-            else:
-                st.write("This employee is predicted to leave in two years.")
+            st.write("Model Predict...")
+            try:
+                prediction = int(requests.post(
+                        "https://employee-churn-1-623372933969.asia-east1.run.app/predict",
+                        headers={"content-type": "application/json"},
+                        data=data_json,
+                    ).text[0])
+                st.write("Return Answer...")
+                status.update(
+                    label="Predict complete!", state="complete", expanded=False
+                )
+            except requests.exceptions.RequestException as e:
+                st.write(f"Error: {e}")
+                
+        if prediction == 0:
+            st.success("This employee is predicted to stay more than two years.")
+        else:
+            st.warning("This employee is predicted to leave in two years.")
 
-        except requests.exceptions.RequestException as e:
-            st.write(f"Error: {e}")
+
 
 
 def main():
